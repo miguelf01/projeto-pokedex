@@ -1,41 +1,61 @@
 
-const offset = 0
-const limit = 10
-const url = `https://pokeapi.co/api/v2/pokemon?offset=${offset}&limit=${limit}`
+const pokemonList = document.getElementById('pokemonList')
+const loadMoreButton = document.getElementById('loadMoreButton')
 
-function convertPokemonToLi(pokemon) {
-        return `
-        <li class="pokemon">
-                <span class="number">#001</span>
+const maxRecords = 151
+const limit = 10
+let offset = 0
+
+function loadPokemonItens(offset, limit) {
+
+   pokeApi.getPokemons(offset, limit).then((pokemons = []) => {
+        pokemonList.innerHTML += pokemons.map((pokemon) =>  
+        `
+        <li class="pokemon ${pokemon.type}">
+                <span class="number">#00${pokemon.number}</span>
                 <span class="name">${pokemon.name}</span>
                 <div class="detail">
                     <ol class="types">
-                        <li class="type">grass</li>
-                        <li class="type">poison</li>
+                        ${pokemon.types.map((type) => `<li class="type ${type}">${type}</li>`).join('')}
                     </ol>
-                    
-                    <img src="imgs/img01.png" alt="${pokemon.name}">
+
+                    <!--  <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/dream-world/${pokemon.order}.svg" alt="${pokemon.name}"> -->
+                    <img src="${pokemon.photo}" alt="${pokemon.name}">
                 </div>
             </li>
         `
+    ).join('')
+   })
+
+}
+
+loadPokemonItens(offset, limit)
+loadMoreButton.addEventListener('click', () => {
+    offset += limit
+
+    const amountRecordNextPage = offset + limit
+
+    if (amountRecordNextPage >= maxRecords) {
+        const newLimit = maxRecords - offset
+        loadPokemonItens(offset, newLimit)
+
+        loadMoreButton.parentElement.removeChild(loadMoreButton)
+        return;
     }
 
-const pokemonList = document.getElementById('pokemonList')
+    loadPokemonItens(offset, limit)
+})
 
-// nao pode usar o appendChlid por causa que é para objeto
+// pokeApi.getPokemons().then((pokemons =[]) => {
 
-fetch(url)
-    .then((response) => response.json())
-    .then((jsonBody) => jsonBody.results)
-    .then((pokemons) => {
-        
-        for (let i = 0; i < pokemons.length; i++) {
-            const pokemon = pokemons[i];
-            pokemonList.innerHTML += convertPokemonToLi(pokemon)
-        }
+//         pokemonList.innerHTML += pokemons.map(convertPokemonToLi).join('')
 
-    })
-    .catch((error) => console.error(error))
-    .finally(function () {
-        console.log('requisicao concluida')
-    })
+    //const listItems = []
+
+    // for (let i = 0; i < pokemons.length; i++) {
+    //     const pokemon = pokemons[i];
+    //     listItems.push(convertPokemonToLi(pokemon))
+    // }
+    
+    // console.log(listItems)
+// })
